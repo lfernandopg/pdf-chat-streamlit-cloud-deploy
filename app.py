@@ -9,6 +9,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
+import tempfile
 
 # --- Configuración inicial ---
 load_dotenv()
@@ -49,9 +50,13 @@ with st.sidebar:
 
     if uploaded_file and st.button("Procesar Documento"):
         with st.spinner("Procesando tu PDF..."):
+            tmp_path = None
             try:
                 # 1. Cargar PDF
-                loader = PyPDFLoader(uploaded_file)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+                    tmp_file.write(uploaded_file.read())
+                    tmp_path = tmp_file.name
+                loader = PyPDFLoader(tmp_path)
                 documents = loader.load()
 
                 # 2. Dividir en chunks
@@ -98,6 +103,9 @@ Respuesta:"""
 
             except Exception as e:
                 st.error(f"Error al procesar el PDF: {e}")
+            finally:
+                if tmp_file_path and os.path.exists(tmp_file_path):
+                os.remove(tmp_file_path)
 
 # --- Chat ---
 st.header("2. Haz tus Preguntas")
