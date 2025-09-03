@@ -105,7 +105,7 @@ Respuesta:"""
                 st.error(f"Error al procesar el PDF: {e}")
             finally:
                 if tmp_file_path and os.path.exists(tmp_file_path):
-                os.remove(tmp_file_path)
+                    os.remove(tmp_file_path)
 
 # --- Chat ---
 st.header("2. Haz tus Preguntas")
