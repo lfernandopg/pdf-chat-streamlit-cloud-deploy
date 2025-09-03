@@ -26,7 +26,7 @@ if "selected_model" not in st.session_state:
     st.session_state.selected_model = "meta-llama/Llama-3.2-3B-Instruct:together"
 
 # --- HuggingFace Token ---
-HF_TOKEN = "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"
+HF_TOKEN = "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"
 if not HF_TOKEN:
     st.error("⚠️ Debes configurar el token de HuggingFace en .streamlit/secrets.toml")
     st.stop()
