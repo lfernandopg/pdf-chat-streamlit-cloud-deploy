@@ -50,13 +50,14 @@ with st.sidebar:
 
     if uploaded_file and st.button("Procesar Documento"):
         with st.spinner("Procesando tu PDF..."):
-            tmp_path = None
+            
+            tmp_file_path = None
             try:
                 # 1. Cargar PDF
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
                     tmp_file.write(uploaded_file.read())
-                    tmp_path = tmp_file.name
-                loader = PyPDFLoader(tmp_path)
+                    tmp_file_path = tmp_file.name
+                loader = PyPDFLoader(tmp_file_path)
                 documents = loader.load()
 
                 # 2. Dividir en chunks
