@@ -15,6 +15,8 @@ import tempfile
 load_dotenv()
 st.set_page_config(page_title="Chatea con tu PDF 💬", page_icon="💬", layout="centered")
 
+st.title("Chatea con tu PDF 💬")
+
 # --- Estado de la sesión ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
