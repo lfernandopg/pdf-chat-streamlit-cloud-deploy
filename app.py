@@ -97,39 +97,42 @@ def process_prompt(prompt):
 
     # Guardar mensaje del usuario
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with chat_container:  # Mostrar en el contenedor de mensajes
+
+    with chat_container:
+        # Mostrar en el contenedor de mensajes
         with st.chat_message("user"):
             st.markdown(prompt)
 
-    # Respuesta del modelo
-    with chat_container:  # Mostrar en el contenedor de mensajes
-        with st.chat_message("assistant"):
-            placeholder = st.empty()
-            full_response = ""
-            
-            with st.spinner(get_text("thinking", st.session_state.language)):
-                try:
-                    result = st.session_state.rag_chain.invoke({"query": prompt})
-                    answer = result["result"]
+        # Respuesta del modelo
+        with chat_container:
+            # Mostrar en el contenedor de mensajes
+            with st.chat_message("assistant"):
+                placeholder = st.empty()
+                full_response = ""
 
-                    # Efecto de escritura mejorado
-                    words = answer.split()
-                    for i, word in enumerate(words):
-                        full_response += word + " "
-                        if i % 3 == 0:  # Actualizar cada 3 palabras para fluidez
-                            time.sleep(0.1)
-                            placeholder.markdown(full_response + "▌")
-                    
-                    placeholder.markdown(full_response)
+                with st.spinner(get_text("thinking", st.session_state.language)):
+                    try:
+                        result = st.session_state.rag_chain.invoke({"query": prompt})
+                        answer = result["result"]
 
-                except Exception as e:
-                    full_response = f"Error: {e}"
-                    placeholder.markdown(full_response)
+                        # Efecto de escritura mejorado
+                        words = answer.split()
+                        for i, word in enumerate(words):
+                            full_response += word + " "
+                            if i % 3 == 0:  # Actualizar cada 3 palabras para fluidez
+                                time.sleep(0.1)
+                                placeholder.markdown(full_response + "▌")
+                        
+                        placeholder.markdown(full_response)
+                    except Exception as e:
+                        full_response = f"Error: {e}"
+                        placeholder.markdown(full_response)
 
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 # --- Configuración inicial ---
 load_dotenv()
+
 st.set_page_config(
     page_title="PDF Chat AI",
     page_icon="💬",
@@ -140,96 +143,96 @@ st.set_page_config(
 # CSS personalizado para mejorar el diseño
 st.markdown("""
 <style>
-    /* Estilos principales */
-    .main-header {
-        text-align: center;
-        padding: 2rem 0;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-    }
-    
-    .stats-container {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 10px;
-        border-left: 4px solid #667eea;
-        margin: 1rem 0;
-    }
-    
-    /* Contenedor de mensajes */
-    .chat-container {
-        border-radius: 10px;
-        padding: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin: 1rem 0;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    /* Contenedor del input fijo en la parte inferior */
-    .input-container {
-        position: sticky;
-        bottom: 0;
-        background: white;
-        padding: 1rem;
-        z-index: 100;
-        border-top: 1px solid #e9ecef;
-    }
-    
-    /* Estilo para el input de chat */
-    .stChatInput {
-        border-radius: 25px !important;
-        box-shadow: 0 -2px 8px rgba(0,0,0,0.1) !important;
-    }
-    
-    /* Asegurar que el contenedor del input no se vea afectado por otros elementos */
-    .element-container:has(.stChatInput) {
-        margin-top: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .sidebar-section {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1rem 0;
-        border: 1px solid #e9ecef;
-    }
-    
-    /* Botones personalizados */
-    .stButton > button {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 20px;
-        padding: 0.5rem 2rem;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    /* Upload area */
-    .uploadedFile {
-        border: 2px dashed #667eea;
-        border-radius: 10px;
-        padding: 2rem;
-        text-align: center;
-        background: #f8f9fa;
-    }
-    
-    /* Chat messages */
-    .stChatMessage {
-        border-radius: 10px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
+/* Estilos principales */
+.main-header {
+    text-align: center;
+    padding: 2rem 0;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.stats-container {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    margin: 1rem 0;
+}
+
+/* Contenedor de mensajes */
+.chat-container {
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 1rem 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Contenedor del input fijo en la parte inferior */
+.input-container {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem;
+    z-index: 100;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Estilo para el input de chat */
+.stChatInput {
+    border-radius: 25px !important;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* Asegurar que el contenedor del input no se vea afectado por otros elementos */
+.element-container:has(.stChatInput) {
+    margin-top: 0 !important;
+    padding: 0 !important;
+}
+
+.sidebar-section {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    border: 1px solid #e9ecef;
+}
+
+/* Botones personalizados */
+.stButton > button {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0.5rem 2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Upload area */
+.uploadedFile {
+    border: 2px dashed #667eea;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    background: #f8f9fa;
+}
+
+/* Chat messages */
+.stChatMessage {
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -265,23 +268,32 @@ st.markdown(f"""
 
 # --- Sidebar ---
 with st.sidebar:
-    # --- Selector de idioma ---
+    # Selector de idioma
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.subheader(get_text("language", st.session_state.language))
-
+    
     language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
+    
+    # SOLUCIÓN: Removemos el callback y manejamos el cambio de idioma directamente
     selected_lang_display = st.selectbox(
         "",
         options=list(language_options.keys()),
-        index=list(language_options.values()).index(st.session_state.language)
+        index=list(language_options.values()).index(st.session_state.language),
+        key="lang_select"
     )
-    # Actualizar idioma directamente sin rerun
-    st.session_state.language = language_options[selected_lang_display]
+    
+    # Actualizar el idioma si ha cambiado
+    new_language = language_options[selected_lang_display]
+    if new_language != st.session_state.language:
+        st.session_state.language = new_language
+        # No necesitamos st.rerun() aquí, Streamlit se recarga automáticamente
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- Sección de carga de PDF ---
+    # Sección de carga de documento
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.header(get_text("upload_section", st.session_state.language))
+    
     uploaded_file = st.file_uploader(
         get_text("upload_label", st.session_state.language),
         type=["pdf"],
@@ -289,24 +301,29 @@ with st.sidebar:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- Botón de procesamiento ---
+    # Botón de procesamiento
     if uploaded_file:
         if st.button(get_text("process_button", st.session_state.language), use_container_width=True):
             with st.spinner(get_text("processing", st.session_state.language)):
                 tmp_file_path = None
                 try:
+                    # 1. Cargar PDF
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
                         tmp_file.write(uploaded_file.read())
                         tmp_file_path = tmp_file.name
+                    
                     loader = PyPDFLoader(tmp_file_path)
                     documents = loader.load()
 
+                    # 2. Dividir en chunks
                     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
                     texts = splitter.split_documents(documents)
 
+                    # 3. Crear embeddings y vector store
                     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
                     vector_store = FAISS.from_documents(texts, embeddings)
 
+                    # 4. Configurar LLM
                     llm = ChatOpenAI(
                         base_url="https://router.huggingface.co/v1",
                         model=st.session_state.selected_model,
@@ -315,28 +332,26 @@ with st.sidebar:
                         api_key=HF_TOKEN,
                     )
 
-                    prompt_template = (
-                        """Usa el siguiente contexto para responder la pregunta de manera clara y precisa.
-Si no tienes suficiente información en el contexto, indícalo claramente.
+                    # 5. Prompt multiidioma
+                    if st.session_state.language == "es":
+                        prompt_template = """Usa el siguiente contexto para responder la pregunta de manera clara y precisa. Si no tienes suficiente información en el contexto, indícalo claramente.
 
 Contexto: {context}
 
 Pregunta: {question}
 
-Respuesta detallada:""" if st.session_state.language == "es"
-                        else
-                        """Use the following context to answer the question clearly and precisely.
-If you don't have enough information in the context, indicate it clearly.
+Respuesta detallada:"""
+                    else:
+                        prompt_template = """Use the following context to answer the question clearly and precisely. If you don't have enough information in the context, indicate it clearly.
 
 Context: {context}
 
 Question: {question}
 
 Detailed answer:"""
-                    )
 
                     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-
+                    
                     rag_chain = RetrievalQA.from_chain_type(
                         llm=llm,
                         chain_type="stuff",
@@ -344,16 +359,18 @@ Detailed answer:"""
                         chain_type_kwargs={"prompt": prompt},
                     )
 
+                    # Guardar estadísticas
                     st.session_state.document_stats = {
                         "pages": len(documents),
                         "chunks": len(texts),
                         "filename": uploaded_file.name
                     }
 
+                    # Guardar en sesión
                     st.session_state.rag_chain = rag_chain
                     st.session_state.pdf_processed = True
                     st.session_state.messages = []
-
+                    
                     st.success(get_text("success", st.session_state.language))
 
                 except Exception as e:
@@ -362,37 +379,44 @@ Detailed answer:"""
                     if tmp_file_path and os.path.exists(tmp_file_path):
                         os.remove(tmp_file_path)
 
-    # --- Configuración avanzada ---
+    # Configuración avanzada
     if not st.session_state.pdf_processed:
         with st.expander(get_text("advanced_settings", st.session_state.language)):
             st.subheader(get_text("model_selection", st.session_state.language))
+            
             model_options = [
                 "meta-llama/Llama-3.2-3B-Instruct:together",
                 "mistralai/Mistral-7B-Instruct-v0.3",
             ]
+            
             st.session_state.selected_model = st.selectbox(
                 get_text("select_model", st.session_state.language),
                 model_options,
                 index=model_options.index(st.session_state.selected_model),
             )
 
-    # --- Estadísticas del documento ---
+    # Estadísticas del documento
     if st.session_state.pdf_processed and st.session_state.document_stats:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.subheader(get_text("stats_title", st.session_state.language))
+        
         stats = st.session_state.document_stats
         st.metric(get_text("pages", st.session_state.language), stats.get("pages", 0))
         st.metric(get_text("chunks", st.session_state.language), stats.get("chunks", 0))
         st.info(f"📄 {stats.get('filename', 'N/A')}")
+        
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- Controles adicionales ---
+    # Controles adicionales
     if st.session_state.pdf_processed:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
+        
         with col1:
             if st.button(get_text("clear_chat", st.session_state.language)):
                 st.session_state.messages = []
+                st.rerun()  # Aquí sí es apropiado usar st.rerun()
+        
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Información sobre la app
@@ -418,9 +442,10 @@ with col1:
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
-    
+
     # Contenedor separado para el input, fijo en la parte inferior
     input_container = st.container()
+    
     with input_container:
         if prompt := st.chat_input(get_text("chat_placeholder", st.session_state.language)):
             process_prompt(prompt)
@@ -429,6 +454,7 @@ with col2:
     # Panel de información adicional
     if st.session_state.pdf_processed:
         st.markdown(f"### {get_text('suggestions', st.session_state.language)}")
+        
         suggestions = [
             "📝 Resume el documento",
             "🔍 ¿Cuáles son los puntos clave?",
