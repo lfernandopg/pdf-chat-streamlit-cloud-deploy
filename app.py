@@ -2,6 +2,7 @@ import os
 import time
 import locale
 import streamlit as st
+import tempfile
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -10,7 +11,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-import tempfile
+ from streamlit_js_eval import streamlit_js_eval
+
 
 # --- Configuración de idiomas ---
 LANGUAGES = {
@@ -79,9 +81,7 @@ LANGUAGES = {
         "about_text": "This application uses RAG (Retrieval Augmented Generation) technology to answer questions about PDF documents using advanced language models. Tip: If you don't know which PDF to upload, you can try your CV 😉",
     }
 }
-def detect_browser_language():
-    # Usamos st_js_eval para obtener navigator.language desde el navegador
-    from streamlit_js_eval import streamlit_js_eval
+def detect_browser_language():    
     
     lang = streamlit_js_eval(js_expressions="navigator.language", key="lang")
     
@@ -156,7 +156,7 @@ if "pdf_processed" not in st.session_state:
 if "selected_model" not in st.session_state:
     st.session_state.selected_model = "meta-llama/Llama-3.2-3B-Instruct:together"
 if "language" not in st.session_state:
-    st.session_state.language = detect_system_language()
+    st.session_state.language = detect_browser_language()
 if "document_stats" not in st.session_state:
     st.session_state.document_stats = {}
 
