@@ -11,7 +11,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
- from streamlit_js_eval import streamlit_js_eval
+from streamlit_js_eval import streamlit_js_eval
 
 
 # --- Configuración de idiomas ---
