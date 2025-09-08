@@ -42,7 +42,7 @@ LANGUAGES = {
         "technologies": "Tecnologías utilizadas:",
         "model_info": "Modelo actual",
         "clear_chat": "🗑️ Limpiar Chat",
-        "download_chat": "💾 Guardar Conversación",
+        "download_chat": "💾 Guardar Chat",
         "download_btn": "Descargar",
         "chat_cleared": "✅ Chat limpio",
         "no_messages_download": "⚠️ No hay mensajes para descargar",
