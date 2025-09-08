@@ -268,19 +268,18 @@ with st.sidebar:
     # Selector de idioma
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.subheader(get_text("language", st.session_state.language))
+    
     language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
     
-    def on_language_change():
-        st.session_state.language = language_options[st.session_state.lang_select]
-        st.rerun()
-
+    # Mostrar selectbox y actualizar el idioma directamente
     selected_lang_display = st.selectbox(
         "",
         options=list(language_options.keys()),
         index=list(language_options.values()).index(st.session_state.language),
-        key="lang_select",
-        on_change=on_language_change
     )
+    # Actualizar el idioma en session_state sin callback
+    st.session_state.language = language_options[selected_lang_display]
+    
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Sección de carga de documento
