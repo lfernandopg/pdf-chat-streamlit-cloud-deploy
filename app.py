@@ -44,7 +44,7 @@ LANGUAGES = {
         "chat_cleared": "✅ Chat limpio",
         "no_messages_download": "⚠️ No hay mensajes para descargar",
         "about": "ℹ️ Acerca de",
-        "about_text": "Esta aplicación utiliza tecnología RAG (Retrieval Augmented Generation) para responder preguntas sobre documentos PDF usando modelos de lenguaje avanzados. \n Sugerencia: si no sabes que PDF subir, puedes probar con mi CV o incluso el tuyo 😉",
+        "about_text": "Esta aplicación utiliza tecnología RAG (Retrieval Augmented Generation) para responder preguntas sobre documentos PDF usando modelos de lenguaje avanzados. Sugerencia: si no sabes que PDF subir, puedes probar con tu CV 😉",
     },
     "en": {
         "title": "💬 Chat with your PDF",
@@ -76,7 +76,7 @@ LANGUAGES = {
         "chat_cleared": "✅ Chat cleared",
         "no_messages_download": "⚠️ No messages to download",
         "about": "ℹ️ About",
-        "about_text": "This application uses RAG (Retrieval Augmented Generation) technology to answer questions about PDF documents using advanced language models. \n Tip: If you don't know which PDF to upload, you can try my CV or even yours 😉",
+        "about_text": "This application uses RAG (Retrieval Augmented Generation) technology to answer questions about PDF documents using advanced language models. Tip: If you don't know which PDF to upload, you can try your CV 😉",
     }
 }
 
