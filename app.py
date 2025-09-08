@@ -310,3 +310,5 @@ with col2:
                 process_prompt(suggestion[2:])
     else:
         st.info("📤 " + ("Sube un PDF para comenzar" if st.session_state.language == "es" else "Upload a PDF to start"))
+
+st.session_state.language = detect_browser_language()
