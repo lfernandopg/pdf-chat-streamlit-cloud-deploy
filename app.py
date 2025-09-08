@@ -166,7 +166,10 @@ if not HF_TOKEN:
 # --- Sidebar completo ---
 with st.sidebar:
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
-    st.subheader(get_text("language", st.session_state.language))
+    if st.session_state.language == "es": 
+        st.subheader("🌐 Idioma")
+    else:
+        st.subheader("🌐 Language")
     language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
     selected_lang_display = st.selectbox(
         "",
