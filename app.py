@@ -195,7 +195,7 @@ with st.sidebar:
                     loader = PyPDFLoader(tmp_file_path)
                     documents = loader.load()
                     # 🚨 Validar número de páginas
-                    if len(pages) > 5:
+                    if len(documents) > 5:
                         st.error(get_text("error_size", st.session_state.language))
                         st.stop()
                     splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
