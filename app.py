@@ -82,8 +82,8 @@ LANGUAGES = {
 
 def detect_system_language():
     try:
-        system_locale = locale.getdefaultlocale()[0]
-        print(system_locale)
+        system_locale = locale.getlocale()[0]
+        print("Locale:", system_locale)
         if system_locale and system_locale.startswith('es'):
             return 'es'
         else:
