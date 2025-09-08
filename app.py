@@ -184,28 +184,35 @@ with st.sidebar:
     uploaded_file = st.file_uploader(get_text("upload_label", st.session_state.language), type=["pdf"])
     st.markdown('</div>', unsafe_allow_html=True)
 
-    if uploaded_file:
-        if st.button(get_text("process_button", st.session_state.language), use_container_width=True):
-            with st.spinner(get_text("processing", st.session_state.language)):
-                tmp_file_path = None
-                try:
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-                        tmp_file.write(uploaded_file.read())
-                        tmp_file_path = tmp_file.name
-                    loader = PyPDFLoader(tmp_file_path)
-                    documents = loader.load()
-                    # 🚨 Validar número de páginas
-                    if len(documents) > 5:
-                        st.error(get_text("error_size", st.session_state.language))
-                        st.stop()
-                    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
-                    texts = splitter.split_documents(documents)
-                    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-                    vector_store = FAISS.from_documents(texts, embeddings)
-                    llm = ChatOpenAI(base_url="https://router.huggingface.co/v1",
-                                     model=st.session_state.selected_model,
-                                     temperature=0.7, max_tokens=800, api_key=HF_TOKEN)
-                    prompt_template = """Usa el siguiente contexto para responder la pregunta de manera clara y precisa.
+    if uploaded_file and not st.session_state.pdf_processed:
+    with st.spinner(get_text("processing", st.session_state.language)):
+        tmp_file_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+                tmp_file.write(uploaded_file.read())
+                tmp_file_path = tmp_file.name
+            loader = PyPDFLoader(tmp_file_path)
+            documents = loader.load()
+
+            # 🚨 Validar número de páginas
+            if len(documents) > 5:
+                st.error(get_text("error_size", st.session_state.language))
+                st.stop()
+
+            splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+            texts = splitter.split_documents(documents)
+            embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+            vector_store = FAISS.from_documents(texts, embeddings)
+
+            llm = ChatOpenAI(
+                base_url="https://router.huggingface.co/v1",
+                model=st.session_state.selected_model,
+                temperature=0.7,
+                max_tokens=800,
+                api_key=HF_TOKEN
+            )
+
+            prompt_template = """Usa el siguiente contexto para responder la pregunta de manera clara y precisa.
 Si no tienes suficiente información en el contexto, indícalo claramente.
 
 Contexto: {context}
@@ -220,24 +227,30 @@ Context: {context}
 Question: {question}
 
 Detailed answer:"""
-                    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-                    rag_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff",
-                                                           retriever=vector_store.as_retriever(search_kwargs={"k": 5}),
-                                                           chain_type_kwargs={"prompt": prompt})
-                    st.session_state.document_stats = {
-                        "pages": len(documents),
-                        "chunks": len(texts),
-                        "filename": uploaded_file.name
-                    }
-                    st.session_state.rag_chain = rag_chain
-                    st.session_state.pdf_processed = True
-                    st.session_state.messages = []
-                    st.success(get_text("success", st.session_state.language))
-                except Exception as e:
-                    st.error(f"{get_text('error_processing', st.session_state.language)}")
-                finally:
-                    if tmp_file_path and os.path.exists(tmp_file_path):
-                        os.remove(tmp_file_path)
+
+            prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+            rag_chain = RetrievalQA.from_chain_type(
+                llm=llm,
+                chain_type="stuff",
+                retriever=vector_store.as_retriever(search_kwargs={"k": 5}),
+                chain_type_kwargs={"prompt": prompt}
+            )
+
+            st.session_state.document_stats = {
+                "pages": len(documents),
+                "chunks": len(texts),
+                "filename": uploaded_file.name
+            }
+            st.session_state.rag_chain = rag_chain
+            st.session_state.pdf_processed = True
+            st.session_state.messages = []
+            st.success(get_text("success", st.session_state.language))
+
+        except Exception as e:
+            st.error(f"{get_text('error_processing', st.session_state.language)}")
+        finally:
+            if tmp_file_path and os.path.exists(tmp_file_path):
+                os.remove(tmp_file_path)
 
     if not st.session_state.pdf_processed:
         with st.expander(get_text("advanced_settings", st.session_state.language)):
