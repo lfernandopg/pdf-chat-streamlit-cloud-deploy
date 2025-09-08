@@ -190,7 +190,7 @@ st.markdown("""
     
     .sidebar-section {
         background: #f8f9fa;
-        padding: 1rem;
+        padding: 1px;
         border-radius: 10px;
         margin: 1rem 0;
         border: 1px solid #e9ecef;
