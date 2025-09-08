@@ -18,7 +18,7 @@ LANGUAGES = {
         "title": "💬 Chatea con tu PDF",
         "subtitle": "Sube un PDF y haz preguntas sobre su contenido usando IA",
         "upload_section": "📄 Carga tu Documento",
-        "upload_label": "Arrastra y suelta tu archivo PDF aquí o da click en 'Browse Files' para cargarlo",
+        "upload_label": "Arrastra y suelta tu archivo PDF aquí o haz clic en 'Browse Files' para cargarlo",
         "chat_section": "💭 Conversación",
         "settings": "⚙️ Configuración",
         "advanced_settings": "🔧 Ajustes Avanzados",
