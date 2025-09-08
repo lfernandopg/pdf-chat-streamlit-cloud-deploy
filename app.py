@@ -135,8 +135,7 @@ st.markdown("""
     .stats-container { background: #f8f9fa; padding:1rem; border-radius:10px; border-left:4px solid #667eea; margin:1rem 0; }
     .chat-container { border-radius:10px; padding:1rem; box-shadow:0 2px 4px rgba(0,0,0,0.1); margin:1rem 0; max-height:400px; overflow-y:auto; }
     .input-container { position:sticky; bottom:0; background:white; padding:1rem; z-index:100; border-top:1px solid #e9ecef; }
-    .stChatInput { border-radius:25px !important; box-shadow:0 -2px 8px rgba(0,0,0,0.1) !important; }
-    .stChatInput:focus { box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); outline: none; }
+    .stChatInput { box-shadow:0 -2px 8px rgba(0,0,0,0.1) !important; }
     .element-container:has(.stChatInput) { margin-top:0 !important; padding:0 !important; }
     .sidebar-section { background-color: rgba(250, 250, 250, 0.2); padding:0px; border-radius:10px; margin:1rem 0; border:1px solid #808080; }
     .stButton > button { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color:white; border:none; border-radius:20px; padding:0.5rem 2rem; font-weight:bold; transition: all 0.3s ease; }
