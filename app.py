@@ -39,7 +39,8 @@ LANGUAGES = {
         "technologies": "Tecnologías utilizadas:",
         "model_info": "Modelo actual",
         "clear_chat": "🗑️ Limpiar Chat",
-        "download_chat": "💾 Descargar Conversación",
+        "download_chat": "💾 Guardar Conversación",
+        "download_btn": "Descargar",
         "chat_cleared": "✅ Chat limpio",
         "no_messages_download": "⚠️ No hay mensajes para descargar",
         "about": "ℹ️ Acerca de",
@@ -70,7 +71,8 @@ LANGUAGES = {
         "chunks": "Processed chunks",
         "model_info": "Current model",
         "clear_chat": "🗑️ Clear Chat",
-        "download_chat": "💾 Download Conversation",
+        "download_chat": "💾 Save Chat",
+        "download_btn": "Download",
         "chat_cleared": "✅ Chat cleared",
         "no_messages_download": "⚠️ No messages to download",
         "about": "ℹ️ About",
@@ -256,7 +258,7 @@ Detailed answer:"""
         if st.button(get_text("download_chat", st.session_state.language)):
             if st.session_state.messages:
                 chat_text = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in st.session_state.messages])
-                st.download_button(label=get_text("download_chat", st.session_state.language),
+                st.download_button(label=get_text("download_btn", st.session_state.language),
                                    data=chat_text,
                                    file_name="chat_con_pdf.txt",
                                    mime="text/plain")
@@ -266,7 +268,7 @@ Detailed answer:"""
 
     with st.expander(get_text("about", st.session_state.language)):
         st.info(get_text("about_text", st.session_state.language))
-        st.markdown(f"**{get_text("technologies", st.session_state.language)}:**")
+        st.markdown(f"**{get_text("technologies", st.session_state.language)}**")
         st.markdown("- 🤖 LangChain")
         st.markdown("- 🔍 FAISS Vector Store")
         st.markdown("- 🤗 HuggingFace Models")
