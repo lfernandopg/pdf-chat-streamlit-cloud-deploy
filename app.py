@@ -30,7 +30,7 @@ LANGUAGES = {
         "error_processing": "❌ Error al procesar el PDF:",
         "error_token": "⚠️ Debes configurar el token de HuggingFace en .streamlit/secrets.toml",
         "warning_upload": "⚠️ Por favor, carga y procesa un PDF primero. Para esto revisa el panel lateral",
-        "chat_placeholder": "💬 Escribe tu pregunta sobre el PDF...",
+        "chat_placeholder": "Escribe tu pregunta sobre el PDF...",
         "thinking": "🤔 Analizando documento...",
         "language": "🌐 Idioma",
         "stats_title": "📊 Estadísticas del Documento",
@@ -62,7 +62,7 @@ LANGUAGES = {
         "error_processing": "❌ Error processing PDF:",
         "error_token": "⚠️ You must configure the HuggingFace token in .streamlit/secrets.toml",
         "warning_upload": "⚠️ Please upload and process a PDF first. For this check the sidebar",
-        "chat_placeholder": "💬 Ask a question about the PDF...",
+        "chat_placeholder": "Ask a question about the PDF...",
         "thinking": "🤔 Analyzing document...",
         "language": "🌐 Language",
         "stats_title": "📊 Document Statistics",
@@ -136,6 +136,7 @@ st.markdown("""
     .chat-container { border-radius:10px; padding:1rem; box-shadow:0 2px 4px rgba(0,0,0,0.1); margin:1rem 0; max-height:400px; overflow-y:auto; }
     .input-container { position:sticky; bottom:0; background:white; padding:1rem; z-index:100; border-top:1px solid #e9ecef; }
     .stChatInput { border-radius:25px !important; box-shadow:0 -2px 8px rgba(0,0,0,0.1) !important; }
+    .stChatInput:focus { box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); outline: none; }
     .element-container:has(.stChatInput) { margin-top:0 !important; padding:0 !important; }
     .sidebar-section { background-color: rgba(250, 250, 250, 0.2); padding:0px; border-radius:10px; margin:1rem 0; border:1px solid #808080; }
     .stButton > button { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color:white; border:none; border-radius:20px; padding:0.5rem 2rem; font-weight:bold; transition: all 0.3s ease; }
