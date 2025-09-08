@@ -81,6 +81,7 @@ LANGUAGES = {
         "about_text": "This application uses RAG (Retrieval Augmented Generation) technology to answer questions about PDF documents using advanced language models. Tip: If you don't know which PDF to upload, you can try your CV 😉",
     }
 }
+
 def detect_browser_language():    
     
     lang = streamlit_js_eval(js_expressions="navigator.language", key="lang")
@@ -236,7 +237,9 @@ Detailed answer:"""
         with st.expander(get_text("advanced_settings", st.session_state.language)):
             st.subheader(get_text("model_selection", st.session_state.language))
             model_options = ["meta-llama/Llama-3.2-3B-Instruct:together",
-                             "mistralai/Mistral-7B-Instruct-v0.3"]
+                             "openai/gpt-oss-20b:together",
+                             "Qwen/Qwen2.5-7B-Instruct:together",
+                             "marin-community/marin-8b-instruct:together"]
             st.session_state.selected_model = st.selectbox(get_text("select_model", st.session_state.language),
                                                            model_options,
                                                            index=model_options.index(st.session_state.selected_model))
@@ -310,5 +313,3 @@ with col2:
                 process_prompt(suggestion[2:])
     else:
         st.info("📤 " + ("Sube un PDF para comenzar" if st.session_state.language == "es" else "Upload a PDF to start"))
-
-st.session_state.language = detect_browser_language()
