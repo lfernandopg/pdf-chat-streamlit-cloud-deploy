@@ -189,7 +189,7 @@ st.markdown("""
     }
     
     .sidebar-section {
-        background: #808080;
+        background: rgba(250, 250, 250, 0.2);
         padding: 0px;
         border-radius: 10px;
         margin: 1rem 0;
