@@ -319,7 +319,7 @@ Detailed answer:"""
                         os.remove(tmp_file_path)
                         
     # Configuración avanzada
-    if not st.session_state.pdf_processed
+    if not st.session_state.pdf_processed:
         with st.expander(get_text("advanced_settings", st.session_state.language)):
             st.subheader(get_text("model_selection", st.session_state.language))
             model_options = [
