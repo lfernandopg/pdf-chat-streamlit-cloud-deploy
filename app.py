@@ -223,18 +223,7 @@ with st.sidebar:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Configuración avanzada
-    with st.expander(get_text("advanced_settings", st.session_state.language)):
-        st.subheader(get_text("model_selection", st.session_state.language))
-        model_options = [
-            "meta-llama/Llama-3.2-3B-Instruct:together",
-            "mistralai/Mistral-7B-Instruct-v0.3",
-        ]
-        st.session_state.selected_model = st.selectbox(
-            get_text("select_model", st.session_state.language),
-            model_options,
-            index=model_options.index(st.session_state.selected_model),
-        )
+
 
     # Botón de procesamiento
     if uploaded_file:
@@ -315,6 +304,19 @@ Detailed answer:"""
                 finally:
                     if tmp_file_path and os.path.exists(tmp_file_path):
                         os.remove(tmp_file_path)
+                        
+    # Configuración avanzada
+    with st.expander(get_text("advanced_settings", st.session_state.language)):
+        st.subheader(get_text("model_selection", st.session_state.language))
+        model_options = [
+            "meta-llama/Llama-3.2-3B-Instruct:together",
+            "mistralai/Mistral-7B-Instruct-v0.3",
+        ]
+        st.session_state.selected_model = st.selectbox(
+            get_text("select_model", st.session_state.language),
+            model_options,
+            index=model_options.index(st.session_state.selected_model),
+        )
 
     # Estadísticas del documento
     if st.session_state.pdf_processed and st.session_state.document_stats:
