@@ -12,7 +12,7 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 import tempfile
 
-# --- Configuración de idiomas (sin cambios) ---
+# --- Configuración de idiomas ---
 LANGUAGES = {
     "es": {
         "title": "💬 Chatea con tu PDF",
@@ -87,6 +87,45 @@ def get_text(key, lang):
     """Obtiene el texto en el idioma seleccionado"""
     return LANGUAGES[lang].get(key, key)
 
+def process_prompt(prompt):
+    """Procesa un prompt, ya sea desde el input o desde una sugerencia."""
+    if not st.session_state.pdf_processed or not st.session_state.rag_chain:
+        st.warning(get_text("warning_upload", st.session_state.language))
+        return
+
+    # Guardar mensaje del usuario
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with chat_container:  # Mostrar en el contenedor de mensajes
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+    # Respuesta del modelo
+    with chat_container:  # Mostrar en el contenedor de mensajes
+        with st.chat_message("assistant"):
+            placeholder = st.empty()
+            full_response = ""
+            
+            with st.spinner(get_text("thinking", st.session_state.language)):
+                try:
+                    result = st.session_state.rag_chain.invoke({"query": prompt})
+                    answer = result["result"]
+
+                    # Efecto de escritura mejorado
+                    words = answer.split()
+                    for i, word in enumerate(words):
+                        full_response += word + " "
+                        if i % 3 == 0:  # Actualizar cada 3 palabras para fluidez
+                            time.sleep(0.1)
+                            placeholder.markdown(full_response + "▌")
+                    
+                    placeholder.markdown(full_response)
+
+                except Exception as e:
+                    full_response = f"Error: {e}"
+                    placeholder.markdown(full_response)
+
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
+
 # --- Configuración inicial ---
 load_dotenv()
 st.set_page_config(
@@ -96,9 +135,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# <<< CAMBIO 1: CSS Simplificado >>>
-# Se eliminó el CSS complejo para .stChatInput y su contenedor.
-# El estilo para .chat-container ahora es manejado directamente por st.container().
+# CSS personalizado para mejorar el diseño
 st.markdown("""
 <style>
     /* Estilos principales */
@@ -117,6 +154,38 @@ st.markdown("""
         border-radius: 10px;
         border-left: 4px solid #667eea;
         margin: 1rem 0;
+    }
+    
+    /* Contenedor de mensajes */
+    .chat-container {
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 1rem 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    /* Contenedor del input fijo en la parte inferior */
+    .input-container {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 1rem;
+        z-index: 100;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    /* Estilo para el input de chat */
+    .stChatInput {
+        border-radius: 25px !important;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Asegurar que el contenedor del input no se vea afectado por otros elementos */
+    .element-container:has(.stChatInput) {
+        margin-top: 0 !important;
+        padding: 0 !important;
     }
     
     .sidebar-section {
@@ -192,7 +261,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar (sin cambios en la lógica interna) ---
+# --- Sidebar ---
 with st.sidebar:
     # Selector de idioma
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
@@ -220,7 +289,6 @@ with st.sidebar:
     if uploaded_file:
         if st.button(get_text("process_button", st.session_state.language), use_container_width=True):
             with st.spinner(get_text("processing", st.session_state.language)):
-                
                 tmp_file_path = None
                 try:
                     # 1. Cargar PDF
@@ -323,89 +391,62 @@ Detailed answer:"""
     # Controles adicionales
     if st.session_state.pdf_processed:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
-        if st.button(get_text("clear_chat", st.session_state.language), use_container_width=True):
-            st.session_state.messages = []
-            st.rerun()
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button(get_text("clear_chat", st.session_state.language)):
+                st.session_state.messages = []
+                st.experimental_rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Información sobre la app
     with st.expander(get_text("about", st.session_state.language)):
         st.info(get_text("about_text", st.session_state.language))
         st.markdown("**Tecnologías utilizadas:**")
-        st.markdown("- 🤖 LangChain\n- 🔍 FAISS Vector Store\n- 🤗 HuggingFace Models\n- ⚡ Streamlit")
-
-
-# <<< CAMBIO 2: Lógica de manejo de prompt refactorizada >>>
-def handle_user_input(prompt_text):
-    """
-    Función centralizada para manejar la entrada del usuario,
-    obtener la respuesta del asistente y actualizar el estado.
-    """
-    # Guardar y mostrar el mensaje del usuario
-    st.session_state.messages.append({"role": "user", "content": prompt_text})
-
-    # Generar y mostrar la respuesta del asistente
-    with st.spinner(get_text("thinking", st.session_state.language)):
-        try:
-            result = st.session_state.rag_chain.invoke({"query": prompt_text})
-            answer = result.get("result", "No se pudo obtener una respuesta.")
-        except Exception as e:
-            answer = f"Error al contactar al modelo: {e}"
-            
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-    # Forzar un rerun para que la UI se actualice con los nuevos mensajes
-    st.rerun()
+        st.markdown("- 🤖 LangChain")
+        st.markdown("- 🔍 FAISS Vector Store")
+        st.markdown("- 🤗 HuggingFace Models")
+        st.markdown("- ⚡ Streamlit")
 
 # --- Área principal de chat ---
 col1, col2 = st.columns([3, 1])
 
 with col1:
     st.header(get_text("chat_section", st.session_state.language))
-
-    # <<< CAMBIO 3: Estructura del chat corregida >>>
-    # El contenedor de mensajes ahora tiene una altura fija para permitir el scroll.
-    chat_container = st.container(height=500)
+    
+    # Contenedor de mensajes con scroll
+    chat_container = st.container()
+    
     with chat_container:
         # Mostrar mensajes existentes
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
     
-    # El input de chat está FUERA del contenedor de mensajes.
-    if prompt := st.chat_input(get_text("chat_placeholder", st.session_state.language)):
-        if not st.session_state.pdf_processed or not st.session_state.rag_chain:
-            st.warning(get_text("warning_upload", st.session_state.language))
-        else:
-            handle_user_input(prompt) # Llama a la función centralizada
-
+    # Contenedor separado para el input, fijo en la parte inferior
+    input_container = st.container()
+    with input_container:
+        if prompt := st.chat_input(get_text("chat_placeholder", st.session_state.language)):
+            process_prompt(prompt)
 
 with col2:
     # Panel de información adicional
     if st.session_state.pdf_processed:
-        st.markdown("### 🎯 Sugerencias")
+        st.markdown("### 🎯 " + ("Sugerencias" if st.session_state.language == "es" else "Suggestions"))
+        suggestions = [
+            "📝 Resume el documento",
+            "🔍 ¿Cuáles son los puntos clave?",
+            "📊 Extrae datos importantes",
+            "❓ Explica conceptos complejos"
+        ] if st.session_state.language == "es" else [
+            "📝 Summarize the document",
+            "🔍 What are the key points?",
+            "📊 Extract important data",
+            "❓ Explain complex concepts"
+        ]
         
-        # <<< CAMBIO 4: Lógica de sugerencias corregida >>>
-        # Se separó el texto para el botón (con emoji) del prompt real.
-        suggestions_map = {
-            "es": {
-                "📝 Resume el documento": "Resume este documento en tres párrafos.",
-                "🔍 ¿Cuáles son los puntos clave?": "¿Cuáles son los 3 puntos clave principales del documento?",
-                "📊 Extrae datos importantes": "Extrae las 5 estadísticas o datos numéricos más importantes que encuentres.",
-                "❓ Explica conceptos complejos": "Identifica el concepto más complejo del texto y explícalo de forma sencilla."
-            },
-            "en": {
-                "📝 Summarize the document": "Summarize this document in three paragraphs.",
-                "🔍 What are the key points?": "What are the 3 main key points of the document?",
-                "📊 Extract important data": "Extract the 5 most important statistics or numerical data you can find.",
-                "❓ Explain complex concepts": "Identify the most complex concept in the text and explain it simply."
-            }
-        }
-        
-        current_suggestions = suggestions_map[st.session_state.language]
-        
-        for label, prompt_text in current_suggestions.items():
-            if st.button(label, use_container_width=True, key=f"suggestion_{prompt_text}"):
-                handle_user_input(prompt_text) # Llama a la función centralizada
-                
+        for suggestion in suggestions:
+            if st.button(suggestion, use_container_width=True, key=f"suggestion_{suggestion}"):
+                # Procesar la sugerencia como un prompt
+                process_prompt(suggestion[2:])  # Quitar el emoji inicial
     else:
         st.info("📤 " + ("Sube un PDF para comenzar" if st.session_state.language == "es" else "Upload a PDF to start"))
