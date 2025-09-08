@@ -132,7 +132,6 @@ st.markdown("""
         position: sticky !important;
         bottom: 0 !important;
         z-index: 100 !important;
-        background: white !important;
         border-radius: 25px !important;
         box-shadow: 0 -2px 8px rgba(0,0,0,0.1) !important;
         margin-top: 1rem !important;
