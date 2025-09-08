@@ -362,91 +362,50 @@ col1, col2 = st.columns([3, 1])
 with col1:
     st.header(get_text("chat_section", st.session_state.language))
 
-    # Contenedor de mensajes
-    chat_container = st.container()
-    
-    def send_message(user_prompt):
-        """Función para enviar un mensaje y obtener respuesta del modelo"""
-        # Guardar mensaje del usuario
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        
-        # Mostrar mensaje del usuario
-        with st.chat_message("user"):
-            st.markdown(user_prompt)
-        
-        # Obtener respuesta del modelo
-        with st.chat_message("assistant"):
-            placeholder = st.empty()
-            full_response = ""
-            with st.spinner(get_text("thinking", st.session_state.language)):
-                try:
-                    result = st.session_state.rag_chain.invoke({"query": user_prompt})
-                    answer = result["result"]
-                    
-                    # Efecto de escritura
-                    words = answer.split()
-                    for i, word in enumerate(words):
-                        full_response += word + " "
-                        if i % 3 == 0:  # Actualizar cada 3 palabras
-                            time.sleep(0.1)
-                            placeholder.markdown(full_response + "▌")
-                            scroll_to_bottom(chat_container)
-                    
-                    placeholder.markdown(full_response)
-                    scroll_to_bottom(chat_container)
-                except Exception as e:
-                    full_response = f"Error: {e}"
-                    placeholder.markdown(full_response)
-                    scroll_to_bottom(chat_container)
-        
-        # Guardar respuesta en estado de sesión
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
-        scroll_to_bottom(chat_container)
-
-    def scroll_to_bottom(container):
-        """Scroll automático usando JavaScript inyectado"""
-        container.empty()  # Necesario para refrescar
-        scroll_script = """
-        <script>
-        const chat = window.parent.document.querySelectorAll('.stContainer')[0];
-        if (chat) { chat.scrollTop = chat.scrollHeight; }
-        </script>
-        """
-        st.components.v1.html(scroll_script)
-
-    # Mostrar mensajes existentes
-    for msg in st.session_state.messages:
-        with chat_container:
+    # <<< CAMBIO 3: Estructura del chat corregida >>>
+    # El contenedor de mensajes ahora tiene una altura fija para permitir el scroll.
+    chat_container = st.container(height=500)
+    with chat_container:
+        # Mostrar mensajes existentes
+        for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
-            scroll_to_bottom(chat_container)
-
-    # Input de chat fijo abajo
+    
+    # El input de chat está FUERA del contenedor de mensajes.
     if prompt := st.chat_input(get_text("chat_placeholder", st.session_state.language)):
         if not st.session_state.pdf_processed or not st.session_state.rag_chain:
             st.warning(get_text("warning_upload", st.session_state.language))
         else:
-            send_message(prompt)
+            handle_user_input(prompt) # Llama a la función centralizada
 
 
 with col2:
-    # Panel de sugerencias / información adicional
+    # Panel de información adicional
     if st.session_state.pdf_processed:
         st.markdown("### 🎯 Sugerencias")
-        suggestions = [
-            "📝 Resume el documento",
-            "🔍 ¿Cuáles son los puntos clave?",
-            "📊 Extrae datos importantes",
-            "❓ Explica conceptos complejos"
-        ] if st.session_state.language == "es" else [
-            "📝 Summarize the document",
-            "🔍 What are the key points?",
-            "📊 Extract important data",
-            "❓ Explain complex concepts"
-        ]
         
-        for suggestion in suggestions:
-            if st.button(suggestion, use_container_width=True, key=f"suggestion_{suggestion}"):
-                send_message(suggestion[2:])  # eliminar emoji y espacio
+        # <<< CAMBIO 4: Lógica de sugerencias corregida >>>
+        # Se separó el texto para el botón (con emoji) del prompt real.
+        suggestions_map = {
+            "es": {
+                "📝 Resume el documento": "Resume este documento en tres párrafos.",
+                "🔍 ¿Cuáles son los puntos clave?": "¿Cuáles son los 3 puntos clave principales del documento?",
+                "📊 Extrae datos importantes": "Extrae las 5 estadísticas o datos numéricos más importantes que encuentres.",
+                "❓ Explica conceptos complejos": "Identifica el concepto más complejo del texto y explícalo de forma sencilla."
+            },
+            "en": {
+                "📝 Summarize the document": "Summarize this document in three paragraphs.",
+                "🔍 What are the key points?": "What are the 3 main key points of the document?",
+                "📊 Extract important data": "Extract the 5 most important statistics or numerical data you can find.",
+                "❓ Explain complex concepts": "Identify the most complex concept in the text and explain it simply."
+            }
+        }
+        
+        current_suggestions = suggestions_map[st.session_state.language]
+        
+        for label, prompt_text in current_suggestions.items():
+            if st.button(label, use_container_width=True, key=f"suggestion_{prompt_text}"):
+                handle_user_input(prompt_text) # Llama a la función centralizada
+                
     else:
         st.info("📤 " + ("Sube un PDF para comenzar" if st.session_state.language == "es" else "Upload a PDF to start"))
