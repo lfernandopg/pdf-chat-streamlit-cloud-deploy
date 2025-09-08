@@ -20,7 +20,7 @@ LANGUAGES = {
         "title": "💬 Chatea con tu PDF",
         "subtitle": "Sube un PDF y haz preguntas sobre su contenido usando IA",
         "upload_section": "📄 Carga tu Documento",
-        "upload_label": "Arrastra y suelta tu archivo PDF aquí o haz clic en 'Browse Files' para cargarlo",
+        "upload_label": "Arrastra y suelta tu archivo PDF aquí o haz clic en 'Browse Files' para cargarlo. Se permiten documentos de máximo 5 páginas",
         "chat_section": "💭 Conversación",
         "settings": "⚙️ Configuración",
         "advanced_settings": "🔧 Ajustes Avanzados",
@@ -29,8 +29,9 @@ LANGUAGES = {
         "process_button": "🚀 Procesar Documento",
         "processing": "🔄 Procesando tu PDF...",
         "success": "✅ PDF procesado exitosamente. ¡Ya puedes hacer preguntas!",
-        "error_processing": "❌ Error al procesar el PDF:",
+        "error_processing": "❌ Error al procesar el PDF, please upload another document.",
         "error_token": "⚠️ Debes configurar el token de HuggingFace en .streamlit/secrets.toml",
+        "error_size": "❌ El documento tiene más de 5 páginas. Solo se permiten PDFs de máximo 5 páginas.",
         "warning_upload": "⚠️ Por favor, carga y procesa un PDF primero. Para esto revisa el panel lateral",
         "chat_placeholder": "Escribe tu pregunta sobre el PDF...",
         "thinking": "🤔 Analizando documento...",
@@ -52,7 +53,7 @@ LANGUAGES = {
         "title": "💬 Chat with your PDF",
         "subtitle": "Upload a PDF and ask questions about its content using AI",
         "upload_section": "📄 Upload your Document",
-        "upload_label": "Drag and drop your PDF file here",
+        "upload_label": "Drag and drop your PDF file here. Documents of a maximum of 5 pages are allowed.",
         "chat_section": "💭 Conversation",
         "settings": "⚙️ Settings",
         "advanced_settings": "🔧 Advanced Settings",
@@ -61,8 +62,9 @@ LANGUAGES = {
         "process_button": "🚀 Process Document",
         "processing": "🔄 Processing your PDF...",
         "success": "✅ PDF processed successfully. You can now ask questions!",
-        "error_processing": "❌ Error processing PDF:",
+        "error_processing": "❌ Error processing PDF, por favor cargue otro documento.",
         "error_token": "⚠️ You must configure the HuggingFace token in .streamlit/secrets.toml",
+        "error_size": "❌ The document is longer than 5 pages. Only PDF files with a maximum of 5 pages are allowed.",
         "warning_upload": "⚠️ Please upload and process a PDF first. For this check the sidebar",
         "chat_placeholder": "Ask a question about the PDF...",
         "thinking": "🤔 Analyzing document...",
@@ -192,13 +194,17 @@ with st.sidebar:
                         tmp_file_path = tmp_file.name
                     loader = PyPDFLoader(tmp_file_path)
                     documents = loader.load()
-                    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+                    # 🚨 Validar número de páginas
+                    if len(pages) > 5:
+                        st.error(get_text("error_size", st.session_state.language))
+                        st.stop()
+                    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
                     texts = splitter.split_documents(documents)
                     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
                     vector_store = FAISS.from_documents(texts, embeddings)
                     llm = ChatOpenAI(base_url="https://router.huggingface.co/v1",
                                      model=st.session_state.selected_model,
-                                     temperature=0.7, max_tokens=512, api_key=HF_TOKEN)
+                                     temperature=0.7, max_tokens=800, api_key=HF_TOKEN)
                     prompt_template = """Usa el siguiente contexto para responder la pregunta de manera clara y precisa.
 Si no tienes suficiente información en el contexto, indícalo claramente.
 
@@ -228,7 +234,7 @@ Detailed answer:"""
                     st.session_state.messages = []
                     st.success(get_text("success", st.session_state.language))
                 except Exception as e:
-                    st.error(f"{get_text('error_processing', st.session_state.language)} {e}")
+                    st.error(f"{get_text('error_processing', st.session_state.language)}")
                 finally:
                     if tmp_file_path and os.path.exists(tmp_file_path):
                         os.remove(tmp_file_path)
