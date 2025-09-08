@@ -84,7 +84,7 @@ LANGUAGES = {
 def detect_browser_language():    
     
     lang = streamlit_js_eval(js_expressions="navigator.language", key="lang")
-    
+    st.write(f"Idioma detectado: **{lang}**")
     if lang:
         if lang.startswith("es"):
             return "es"
