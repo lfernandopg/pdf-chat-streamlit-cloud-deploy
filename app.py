@@ -265,25 +265,21 @@ st.markdown(f"""
 
 # --- Sidebar ---
 with st.sidebar:
+    # --- Selector de idioma ---
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.subheader(get_text("language", st.session_state.language))
 
     language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
-
-    # Mostrar selectbox y obtener selección
     selected_lang_display = st.selectbox(
         "",
         options=list(language_options.keys()),
         index=list(language_options.values()).index(st.session_state.language)
     )
-
-    # Si el idioma cambió, actualizar session_state
-    if st.session_state.language != language_options[selected_lang_display]:
-        st.session_state.language = language_options[selected_lang_display]
-        st.experimental_rerun()  # ✅ seguro fuera de callback
+    # Actualizar idioma directamente sin rerun
+    st.session_state.language = language_options[selected_lang_display]
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Sección de carga de documento
+
+    # --- Sección de carga de PDF ---
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.header(get_text("upload_section", st.session_state.language))
     uploaded_file = st.file_uploader(
@@ -293,28 +289,24 @@ with st.sidebar:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Botón de procesamiento
+    # --- Botón de procesamiento ---
     if uploaded_file:
         if st.button(get_text("process_button", st.session_state.language), use_container_width=True):
             with st.spinner(get_text("processing", st.session_state.language)):
                 tmp_file_path = None
                 try:
-                    # 1. Cargar PDF
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
                         tmp_file.write(uploaded_file.read())
                         tmp_file_path = tmp_file.name
                     loader = PyPDFLoader(tmp_file_path)
                     documents = loader.load()
 
-                    # 2. Dividir en chunks
                     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
                     texts = splitter.split_documents(documents)
 
-                    # 3. Crear embeddings y vector store
                     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
                     vector_store = FAISS.from_documents(texts, embeddings)
 
-                    # 4. Configurar LLM
                     llm = ChatOpenAI(
                         base_url="https://router.huggingface.co/v1",
                         model=st.session_state.selected_model,
@@ -323,18 +315,17 @@ with st.sidebar:
                         api_key=HF_TOKEN,
                     )
 
-                    # 5. Prompt multiidioma
-                    if st.session_state.language == "es":
-                        prompt_template = """Usa el siguiente contexto para responder la pregunta de manera clara y precisa.
+                    prompt_template = (
+                        """Usa el siguiente contexto para responder la pregunta de manera clara y precisa.
 Si no tienes suficiente información en el contexto, indícalo claramente.
 
 Contexto: {context}
 
 Pregunta: {question}
 
-Respuesta detallada:"""
-                    else:
-                        prompt_template = """Use the following context to answer the question clearly and precisely.
+Respuesta detallada:""" if st.session_state.language == "es"
+                        else
+                        """Use the following context to answer the question clearly and precisely.
 If you don't have enough information in the context, indicate it clearly.
 
 Context: {context}
@@ -342,6 +333,7 @@ Context: {context}
 Question: {question}
 
 Detailed answer:"""
+                    )
 
                     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
@@ -352,14 +344,12 @@ Detailed answer:"""
                         chain_type_kwargs={"prompt": prompt},
                     )
 
-                    # Guardar estadísticas
                     st.session_state.document_stats = {
                         "pages": len(documents),
                         "chunks": len(texts),
                         "filename": uploaded_file.name
                     }
 
-                    # Guardar en sesión
                     st.session_state.rag_chain = rag_chain
                     st.session_state.pdf_processed = True
                     st.session_state.messages = []
@@ -372,7 +362,7 @@ Detailed answer:"""
                     if tmp_file_path and os.path.exists(tmp_file_path):
                         os.remove(tmp_file_path)
 
-    # Configuración avanzada
+    # --- Configuración avanzada ---
     if not st.session_state.pdf_processed:
         with st.expander(get_text("advanced_settings", st.session_state.language)):
             st.subheader(get_text("model_selection", st.session_state.language))
@@ -386,7 +376,7 @@ Detailed answer:"""
                 index=model_options.index(st.session_state.selected_model),
             )
 
-    # Estadísticas del documento
+    # --- Estadísticas del documento ---
     if st.session_state.pdf_processed and st.session_state.document_stats:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.subheader(get_text("stats_title", st.session_state.language))
@@ -396,14 +386,13 @@ Detailed answer:"""
         st.info(f"📄 {stats.get('filename', 'N/A')}")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Controles adicionales
+    # --- Controles adicionales ---
     if st.session_state.pdf_processed:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             if st.button(get_text("clear_chat", st.session_state.language)):
                 st.session_state.messages = []
-                st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Información sobre la app
