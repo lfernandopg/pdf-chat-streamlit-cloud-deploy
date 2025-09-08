@@ -36,6 +36,7 @@ LANGUAGES = {
         "stats_title": "📊 Estadísticas del Documento",
         "pages": "Páginas",
         "chunks": "Fragmentos procesados",
+        "technologies": "Tecnologías utilizadas:",
         "model_info": "Modelo actual",
         "clear_chat": "🗑️ Limpiar Chat",
         "download_chat": "💾 Descargar Conversación",
@@ -65,6 +66,7 @@ LANGUAGES = {
         "language": "🌐 Language",
         "stats_title": "📊 Document Statistics",
         "pages": "Pages",
+        "technologies": "Technologies used:",
         "chunks": "Processed chunks",
         "model_info": "Current model",
         "clear_chat": "🗑️ Clear Chat",
@@ -248,26 +250,23 @@ Detailed answer:"""
 
     if st.session_state.pdf_processed:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button(get_text("clear_chat", st.session_state.language)):
-                st.session_state.messages = []
-                st.success(get_text("chat_cleared", st.session_state.language))
-        with col2:
-            if st.button(get_text("download_chat", st.session_state.language)):
-                if st.session_state.messages:
-                    chat_text = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in st.session_state.messages])
-                    st.download_button(label=get_text("download_chat", st.session_state.language),
-                                       data=chat_text,
-                                       file_name="chat_con_pdf.txt",
-                                       mime="text/plain")
-                else:
-                    st.warning(get_text("no_messages_download", st.session_state.language))
+        if st.button(get_text("clear_chat", st.session_state.language)):
+            st.session_state.messages = []
+            st.success(get_text("chat_cleared", st.session_state.language))
+        if st.button(get_text("download_chat", st.session_state.language)):
+            if st.session_state.messages:
+                chat_text = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in st.session_state.messages])
+                st.download_button(label=get_text("download_chat", st.session_state.language),
+                                   data=chat_text,
+                                   file_name="chat_con_pdf.txt",
+                                   mime="text/plain")
+            else:
+                st.warning(get_text("no_messages_download", st.session_state.language))
         st.markdown('</div>', unsafe_allow_html=True)
 
     with st.expander(get_text("about", st.session_state.language)):
         st.info(get_text("about_text", st.session_state.language))
-        st.markdown("**Tecnologías utilizadas:**")
+        st.markdown(f"**{get_text("technologies", st.session_state.language)}:**")
         st.markdown("- 🤖 LangChain")
         st.markdown("- 🔍 FAISS Vector Store")
         st.markdown("- 🤗 HuggingFace Models")
