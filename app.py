@@ -118,7 +118,6 @@ st.markdown("""
     }
     
     .chat-container {
-        background: white;
         border-radius: 10px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -160,7 +159,6 @@ st.markdown("""
     
     /* Chat messages */
     .stChatMessage {
-        background: white;
         border-radius: 10px;
         padding: 1rem;
         margin: 0.5rem 0;
