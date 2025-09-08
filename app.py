@@ -12,7 +12,7 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 import tempfile
 
-# --- Configuración de idiomas ---
+# --- Configuración de idiomas (sin cambios) ---
 LANGUAGES = {
     "es": {
         "title": "💬 Chatea con tu PDF",
@@ -45,7 +45,7 @@ LANGUAGES = {
     "en": {
         "title": "💬 Chat with your PDF",
         "subtitle": "Upload a PDF and ask questions about its content using AI",
-        "upload_section": "📄 Upload your Document", 
+        "upload_section": "📄 Upload your Document",
         "upload_label": "Drag and drop your PDF file here",
         "chat_section": "💭 Conversation",
         "settings": "⚙️ Settings",
@@ -90,13 +90,15 @@ def get_text(key, lang):
 # --- Configuración inicial ---
 load_dotenv()
 st.set_page_config(
-    page_title="PDF Chat AI", 
-    page_icon="💬", 
+    page_title="PDF Chat AI",
+    page_icon="💬",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# CSS personalizado para mejorar el diseño
+# <<< CAMBIO 1: CSS Simplificado >>>
+# Se eliminó el CSS complejo para .stChatInput y su contenedor.
+# El estilo para .chat-container ahora es manejado directamente por st.container().
 st.markdown("""
 <style>
     /* Estilos principales */
@@ -115,33 +117,6 @@ st.markdown("""
         border-radius: 10px;
         border-left: 4px solid #667eea;
         margin: 1rem 0;
-    }
-    
-    /* Chat container con scroll */
-    .chat-container {
-        border-radius: 10px;
-        padding: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin: 1rem 0;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    /* Input fijo en la parte inferior */
-    .stChatInput {
-        position: sticky !important;
-        bottom: 0 !important;
-        z-index: 100 !important;
-        border-radius: 25px !important;
-        box-shadow: 0 -2px 8px rgba(0,0,0,0.1) !important;
-        margin-top: 1rem !important;
-    }
-    
-    /* Asegurar que el scroll funcione correctamente */
-    .element-container:has(.stChatInput) {
-        position: sticky !important;
-        bottom: 0 !important;
-        padding-top: 10px !important;
     }
     
     .sidebar-section {
@@ -217,7 +192,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar ---
+# --- Sidebar (sin cambios en la lógica interna) ---
 with st.sidebar:
     # Selector de idioma
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
@@ -235,12 +210,11 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.header(get_text("upload_section", st.session_state.language))
     uploaded_file = st.file_uploader(
-        get_text("upload_label", st.session_state.language), 
+        get_text("upload_label", st.session_state.language),
         type=["pdf"],
         help="Archivos soportados: PDF"
     )
     st.markdown('</div>', unsafe_allow_html=True)
-
 
     # Botón de procesamiento
     if uploaded_file:
@@ -322,7 +296,6 @@ Detailed answer:"""
                     if tmp_file_path and os.path.exists(tmp_file_path):
                         os.remove(tmp_file_path)
 
-
     # Configuración avanzada
     if not st.session_state.pdf_processed:
         with st.expander(get_text("advanced_settings", st.session_state.language)):
@@ -350,92 +323,89 @@ Detailed answer:"""
     # Controles adicionales
     if st.session_state.pdf_processed:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button(get_text("clear_chat", st.session_state.language)):
-                st.session_state.messages = []
-                st.experimental_rerun()
+        if st.button(get_text("clear_chat", st.session_state.language), use_container_width=True):
+            st.session_state.messages = []
+            st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Información sobre la app
     with st.expander(get_text("about", st.session_state.language)):
         st.info(get_text("about_text", st.session_state.language))
         st.markdown("**Tecnologías utilizadas:**")
-        st.markdown("- 🤖 LangChain")
-        st.markdown("- 🔍 FAISS Vector Store")
-        st.markdown("- 🤗 HuggingFace Models")
-        st.markdown("- ⚡ Streamlit")
+        st.markdown("- 🤖 LangChain\n- 🔍 FAISS Vector Store\n- 🤗 HuggingFace Models\n- ⚡ Streamlit")
+
+
+# <<< CAMBIO 2: Lógica de manejo de prompt refactorizada >>>
+def handle_user_input(prompt_text):
+    """
+    Función centralizada para manejar la entrada del usuario,
+    obtener la respuesta del asistente y actualizar el estado.
+    """
+    # Guardar y mostrar el mensaje del usuario
+    st.session_state.messages.append({"role": "user", "content": prompt_text})
+
+    # Generar y mostrar la respuesta del asistente
+    with st.spinner(get_text("thinking", st.session_state.language)):
+        try:
+            result = st.session_state.rag_chain.invoke({"query": prompt_text})
+            answer = result.get("result", "No se pudo obtener una respuesta.")
+        except Exception as e:
+            answer = f"Error al contactar al modelo: {e}"
+            
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    # Forzar un rerun para que la UI se actualice con los nuevos mensajes
+    st.rerun()
 
 # --- Área principal de chat ---
 col1, col2 = st.columns([3, 1])
 
 with col1:
     st.header(get_text("chat_section", st.session_state.language))
-    
-    # Contenedor de chat
-    chat_container = st.container()
-    
+
+    # <<< CAMBIO 3: Estructura del chat corregida >>>
+    # El contenedor de mensajes ahora tiene una altura fija para permitir el scroll.
+    chat_container = st.container(height=500)
     with chat_container:
         # Mostrar mensajes existentes
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
+    
+    # El input de chat está FUERA del contenedor de mensajes.
+    if prompt := st.chat_input(get_text("chat_placeholder", st.session_state.language)):
+        if not st.session_state.pdf_processed or not st.session_state.rag_chain:
+            st.warning(get_text("warning_upload", st.session_state.language))
+        else:
+            handle_user_input(prompt) # Llama a la función centralizada
 
-        # Input de chat
-        if prompt := st.chat_input(get_text("chat_placeholder", st.session_state.language)):
-            if not st.session_state.pdf_processed or not st.session_state.rag_chain:
-                st.warning(get_text("warning_upload", st.session_state.language))
-            else:
-                # Guardar mensaje del usuario
-                st.session_state.messages.append({"role": "user", "content": prompt})
-                with st.chat_message("user"):
-                    st.markdown(prompt)
-
-                # Respuesta del modelo
-                with st.chat_message("assistant"):
-                    placeholder = st.empty()
-                    full_response = ""
-                    
-                    with st.spinner(get_text("thinking", st.session_state.language)):
-                        try:
-                            result = st.session_state.rag_chain.invoke({"query": prompt})
-                            answer = result["result"]
-
-                            # Efecto de escritura mejorado
-                            words = answer.split()
-                            for i, word in enumerate(words):
-                                full_response += word + " "
-                                if i % 3 == 0:  # Actualizar cada 3 palabras para fluidez
-                                    time.sleep(0.1)
-                                    placeholder.markdown(full_response + "▌")
-                            
-                            placeholder.markdown(full_response)
-
-                        except Exception as e:
-                            full_response = f"Error: {e}"
-                            placeholder.markdown(full_response)
-
-                st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 with col2:
     # Panel de información adicional
     if st.session_state.pdf_processed:
         st.markdown("### 🎯 Sugerencias")
-        suggestions = [
-            "📝 Resume el documento",
-            "🔍 ¿Cuáles son los puntos clave?",
-            "📊 Extrae datos importantes",
-            "❓ Explica conceptos complejos"
-        ] if st.session_state.language == "es" else [
-            "📝 Summarize the document",
-            "🔍 What are the key points?", 
-            "📊 Extract important data",
-            "❓ Explain complex concepts"
-        ]
         
-        for suggestion in suggestions:
-            if st.button(suggestion, use_container_width=True, key=f"suggestion_{suggestion}"):
-                # Simular click en el input de chat
-                st.session_state.messages.append({"role": "user", "content": suggestion[2:]})
+        # <<< CAMBIO 4: Lógica de sugerencias corregida >>>
+        # Se separó el texto para el botón (con emoji) del prompt real.
+        suggestions_map = {
+            "es": {
+                "📝 Resume el documento": "Resume este documento en tres párrafos.",
+                "🔍 ¿Cuáles son los puntos clave?": "¿Cuáles son los 3 puntos clave principales del documento?",
+                "📊 Extrae datos importantes": "Extrae las 5 estadísticas o datos numéricos más importantes que encuentres.",
+                "❓ Explica conceptos complejos": "Identifica el concepto más complejo del texto y explícalo de forma sencilla."
+            },
+            "en": {
+                "📝 Summarize the document": "Summarize this document in three paragraphs.",
+                "🔍 What are the key points?": "What are the 3 main key points of the document?",
+                "📊 Extract important data": "Extract the 5 most important statistics or numerical data you can find.",
+                "❓ Explain complex concepts": "Identify the most complex concept in the text and explain it simply."
+            }
+        }
+        
+        current_suggestions = suggestions_map[st.session_state.language]
+        
+        for label, prompt_text in current_suggestions.items():
+            if st.button(label, use_container_width=True, key=f"suggestion_{prompt_text}"):
+                handle_user_input(prompt_text) # Llama a la función centralizada
+                
     else:
         st.info("📤 " + ("Sube un PDF para comenzar" if st.session_state.language == "es" else "Upload a PDF to start"))
