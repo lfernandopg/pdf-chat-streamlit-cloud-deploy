@@ -119,7 +119,6 @@ st.markdown("""
     
     /* Chat container con scroll */
     .chat-container {
-        background: white;
         border-radius: 10px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -143,7 +142,6 @@ st.markdown("""
     .element-container:has(.stChatInput) {
         position: sticky !important;
         bottom: 0 !important;
-        background: white !important;
         padding-top: 10px !important;
     }
     
@@ -182,7 +180,6 @@ st.markdown("""
     
     /* Chat messages */
     .stChatMessage {
-        background: white;
         border-radius: 10px;
         padding: 1rem;
         margin: 0.5rem 0;
