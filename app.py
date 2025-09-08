@@ -265,21 +265,22 @@ st.markdown(f"""
 
 # --- Sidebar ---
 with st.sidebar:
-    # Selector de idioma
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.subheader(get_text("language", st.session_state.language))
-    
+
     language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
-    
-    # Mostrar selectbox y actualizar el idioma directamente
+
+    # Mostrar selectbox y obtener selección
     selected_lang_display = st.selectbox(
         "",
         options=list(language_options.keys()),
-        index=list(language_options.values()).index(st.session_state.language),
+        index=list(language_options.values()).index(st.session_state.language)
     )
-    # Actualizar el idioma en session_state sin callback
-    st.session_state.language = language_options[selected_lang_display]
-    
+
+    # Si el idioma cambió, actualizar session_state
+    if st.session_state.language != language_options[selected_lang_display]:
+        st.session_state.language = language_options[selected_lang_display]
+        st.experimental_rerun()  # ✅ seguro fuera de callback
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Sección de carga de documento
