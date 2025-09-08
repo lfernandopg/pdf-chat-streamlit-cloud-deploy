@@ -189,13 +189,12 @@ st.markdown("""
     }
     
     .sidebar-section {
-        background-color: #fafafa33;
+        background-color: rgba(250, 250, 250, 0.2);
         padding: 0px;
         border-radius: 10px;
         margin: 1rem 0;
-        border: 1px solid #e9ecef;
-    }
-    
+        border: 1px solid #808080; /* Aquí se cambia el color a gris */
+    }    
     /* Botones personalizados */
     .stButton > button {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
