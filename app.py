@@ -237,7 +237,6 @@ Detailed answer:"""
         with st.expander(get_text("advanced_settings", st.session_state.language)):
             st.subheader(get_text("model_selection", st.session_state.language))
             model_options = ["meta-llama/Llama-3.2-3B-Instruct:together",
-                             "openai/gpt-oss-20b:together",
                              "Qwen/Qwen2.5-7B-Instruct:together",
                              "marin-community/marin-8b-instruct:together"]
             st.session_state.selected_model = st.selectbox(get_text("select_model", st.session_state.language),
