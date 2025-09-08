@@ -79,17 +79,18 @@ LANGUAGES = {
         "about_text": "This application uses RAG (Retrieval Augmented Generation) technology to answer questions about PDF documents using advanced language models. Tip: If you don't know which PDF to upload, you can try your CV 😉",
     }
 }
-
-def detect_system_language():
-    try:
-        system_locale = locale.getlocale()[0]
-        print("Locale:", system_locale)
-        if system_locale and system_locale.startswith('es'):
-            return 'es'
+def detect_browser_language():
+    # Usamos st_js_eval para obtener navigator.language desde el navegador
+    from streamlit_js_eval import streamlit_js_eval
+    
+    lang = streamlit_js_eval(js_expressions="navigator.language", key="lang")
+    
+    if lang:
+        if lang.startswith("es"):
+            return "es"
         else:
-            return 'en'
-    except:
-        return 'en'
+            return "en"
+    return "en"
 
 def get_text(key, lang):
     return LANGUAGES[lang].get(key, key)
