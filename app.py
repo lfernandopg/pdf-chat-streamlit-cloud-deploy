@@ -117,11 +117,25 @@ st.markdown("""
         margin: 1rem 0;
     }
     
+    /* Chat container fijo */
     .chat-container {
         border-radius: 10px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin: 1rem 0;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    /* Input fijo en la parte superior */
+    .stChatInput {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+        background: white !important;
+        border-radius: 25px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        margin-bottom: 1rem !important;
     }
     
     .sidebar-section {
@@ -223,6 +237,7 @@ with st.sidebar:
 
 
 
+
     # Botón de procesamiento
     if uploaded_file:
         if st.button(get_text("process_button", st.session_state.language), use_container_width=True):
@@ -304,17 +319,18 @@ Detailed answer:"""
                         os.remove(tmp_file_path)
                         
     # Configuración avanzada
-    with st.expander(get_text("advanced_settings", st.session_state.language)):
-        st.subheader(get_text("model_selection", st.session_state.language))
-        model_options = [
-            "meta-llama/Llama-3.2-3B-Instruct:together",
-            "mistralai/Mistral-7B-Instruct-v0.3",
-        ]
-        st.session_state.selected_model = st.selectbox(
-            get_text("select_model", st.session_state.language),
-            model_options,
-            index=model_options.index(st.session_state.selected_model),
-        )
+    if not st.session_state.pdf_processed
+        with st.expander(get_text("advanced_settings", st.session_state.language)):
+            st.subheader(get_text("model_selection", st.session_state.language))
+            model_options = [
+                "meta-llama/Llama-3.2-3B-Instruct:together",
+                "mistralai/Mistral-7B-Instruct-v0.3",
+            ]
+            st.session_state.selected_model = st.selectbox(
+                get_text("select_model", st.session_state.language),
+                model_options,
+                index=model_options.index(st.session_state.selected_model),
+            )
 
     # Estadísticas del documento
     if st.session_state.pdf_processed and st.session_state.document_stats:
