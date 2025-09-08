@@ -84,7 +84,7 @@ LANGUAGES = {
 def detect_browser_language():    
     
     lang = streamlit_js_eval(js_expressions="navigator.language", key="lang")
-    st.write(f"Idioma detectado: **{lang}**")
+    
     if lang:
         if lang.startswith("es"):
             return "es"
@@ -167,7 +167,7 @@ if not HF_TOKEN:
 
 # --- Sidebar completo ---
 with st.sidebar:
-    language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
+    language_options = {"🇺🇸 English": "en", "🇪🇸 Español": "es"}
     selected_lang_display = st.selectbox(
         "",
         options=list(language_options.keys()),
