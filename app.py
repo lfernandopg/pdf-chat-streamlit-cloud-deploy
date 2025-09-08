@@ -41,6 +41,7 @@ LANGUAGES = {
         "download_chat": "💾 Descargar Conversación",
         "about": "ℹ️ Acerca de",
         "about_text": "Esta aplicación utiliza tecnología RAG (Retrieval Augmented Generation) para responder preguntas sobre documentos PDF usando modelos de lenguaje avanzados.",
+        "suggestions": "🎯 Sugerencias"
     },
     "en": {
         "title": "💬 Chat with your PDF",
@@ -69,6 +70,7 @@ LANGUAGES = {
         "download_chat": "💾 Download Conversation",
         "about": "ℹ️ About",
         "about_text": "This application uses RAG (Retrieval Augmented Generation) technology to answer questions about PDF documents using advanced language models.",
+        "suggestions": "🎯 Suggestions"
     }
 }
 
@@ -267,12 +269,18 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.subheader(get_text("language", st.session_state.language))
     language_options = {"🇪🇸 Español": "es", "🇺🇸 English": "en"}
+    
+    def on_language_change():
+        st.session_state.language = language_options[st.session_state.lang_select]
+        st.rerun()
+
     selected_lang_display = st.selectbox(
         "",
         options=list(language_options.keys()),
-        index=list(language_options.values()).index(st.session_state.language)
+        index=list(language_options.values()).index(st.session_state.language),
+        key="lang_select",
+        on_change=on_language_change
     )
-    st.session_state.language = language_options[selected_lang_display]
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Sección de carga de documento
@@ -281,7 +289,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader(
         get_text("upload_label", st.session_state.language),
         type=["pdf"],
-        help="Archivos soportados: PDF"
+        help=get_text("upload_label", st.session_state.language)
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -395,13 +403,13 @@ Detailed answer:"""
         with col1:
             if st.button(get_text("clear_chat", st.session_state.language)):
                 st.session_state.messages = []
-                st.experimental_rerun()
+                st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Información sobre la app
     with st.expander(get_text("about", st.session_state.language)):
         st.info(get_text("about_text", st.session_state.language))
-        st.markdown("**Tecnologías utilizadas:**")
+        st.markdown("**" + get_text("about", st.session_state.language) + ":**")
         st.markdown("- 🤖 LangChain")
         st.markdown("- 🔍 FAISS Vector Store")
         st.markdown("- 🤗 HuggingFace Models")
@@ -431,7 +439,7 @@ with col1:
 with col2:
     # Panel de información adicional
     if st.session_state.pdf_processed:
-        st.markdown("### 🎯 " + ("Sugerencias" if st.session_state.language == "es" else "Suggestions"))
+        st.markdown(f"### {get_text('suggestions', st.session_state.language)}")
         suggestions = [
             "📝 Resume el documento",
             "🔍 ¿Cuáles son los puntos clave?",
@@ -449,4 +457,4 @@ with col2:
                 # Procesar la sugerencia como un prompt
                 process_prompt(suggestion[2:])  # Quitar el emoji inicial
     else:
-        st.info("📤 " + ("Sube un PDF para comenzar" if st.session_state.language == "es" else "Upload a PDF to start"))
+        st.info("📤 " + get_text("warning_upload", st.session_state.language))
