@@ -253,16 +253,6 @@ with st.sidebar:
                 if tmp_file_path and os.path.exists(tmp_file_path):
                     os.remove(tmp_file_path)
 
-    if not st.session_state.pdf_processed:
-        with st.expander(get_text("advanced_settings", st.session_state.language)):
-            st.subheader(get_text("model_selection", st.session_state.language))
-            model_options = ["meta-llama/Llama-3.2-3B-Instruct:together",
-                             "Qwen/Qwen2.5-7B-Instruct:together",
-                             "marin-community/marin-8b-instruct:together"]
-            st.session_state.selected_model = st.selectbox(get_text("select_model", st.session_state.language),
-                                                           model_options,
-                                                           index=model_options.index(st.session_state.selected_model))
-
     if st.session_state.pdf_processed and st.session_state.document_stats:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.subheader(get_text("stats_title", st.session_state.language))
